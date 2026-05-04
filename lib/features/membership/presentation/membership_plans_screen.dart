@@ -123,7 +123,7 @@ class _MembershipPlansScreenState extends State<MembershipPlansScreen> {
           const SizedBox(height: 14),
 
           Text(
-            plan['price'],
+            plan['display_price'],
             style: const TextStyle(
               color: Color(0xFF1B5E20),
               fontSize: 26,

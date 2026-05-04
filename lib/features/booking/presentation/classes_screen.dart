@@ -66,20 +66,29 @@ class _ClassesScreenState extends State<ClassesScreen> {
                 color: Color(0xFF1B5E20),
               ),
             )
-          : classes.isEmpty
-              ? const EmptyState(
-                  icon: Icons.self_improvement,
-                  title: 'No classes available',
-                  message: 'This gym has not added any classes yet. Please check again later.',
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: classes.length,
-                  itemBuilder: (context, index) {
-                    final c = classes[index];
-                    return _classCard(c);
-                  },
-                ),
+          : RefreshIndicator(
+            onRefresh: fetchClasses,
+            child: classes.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 120),
+                      EmptyState(
+                        icon: Icons.self_improvement,
+                        title: 'No classes available',
+                        message:
+                            'This gym has not added any classes yet. Please check again later.',
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: classes.length,
+                    itemBuilder: (context, index) {
+                      final c = classes[index];
+                      return _classCard(c);
+                    },
+                  ),
+          ),
     );
   }
 

@@ -87,12 +87,20 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                 color: Color(0xFF1B5E20),
               ),
             )
-          : bookings.isEmpty
-              ? const EmptyState(
-                  icon: Icons.calendar_month,
-                  title: 'No bookings yet',
-                  message: 'Book a class from any gym and your bookings will appear here.',
-                )
+          : RefreshIndicator(
+              onRefresh: fetchBookingHistory,
+              child: bookings.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 120),
+                        EmptyState(
+                          icon: Icons.calendar_month,
+                          title: 'No bookings yet',
+                          message:
+                              'Book a class from any gym and your bookings will appear here.',
+                        ),
+                      ],
+                    )
               : ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: bookings.length,
@@ -177,6 +185,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                     );
                   },
                 ),
+      ),
     );
   }
 }

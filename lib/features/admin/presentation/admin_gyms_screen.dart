@@ -203,9 +203,18 @@ class _AdminGymsScreenState extends State<AdminGymsScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : gyms.isEmpty
-              ? const Center(child: Text('No gyms added yet'))
+          : RefreshIndicator(
+              onRefresh: fetchGyms,
+              child: gyms.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 180),
+                        Center(child: Text('No gyms added yet')),
+                      ],
+                    )
               : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(16),
                   itemCount: gyms.length,
                   itemBuilder: (context, index) {
@@ -265,6 +274,7 @@ class _AdminGymsScreenState extends State<AdminGymsScreen> {
                     );
                   },
                 ),
+      ),
     );
   }
 }

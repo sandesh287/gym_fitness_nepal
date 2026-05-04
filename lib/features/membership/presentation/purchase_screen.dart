@@ -45,7 +45,7 @@ class PurchaseScreen extends StatelessWidget {
             const SizedBox(height: 10),
 
             Text(
-              plan['price'],
+              plan['display_price'],
               style: const TextStyle(
                 fontSize: 24,
                 color: Color(0xFF1B5E20),

@@ -174,21 +174,28 @@ class _GymsScreenState extends State<GymsScreen> {
               children: [
                 _filterSection(),
                 Expanded(
-                  child: gyms.isEmpty
-                      ? EmptyState(
-                          icon: Icons.fitness_center,
-                          title: 'No gyms found',
-                          message:
-                              'Try changing your search or filter options.',
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: gyms.length,
-                          itemBuilder: (context, index) {
-                            final gym = gyms[index];
-                            return _gymCard(gym);
-                          },
-                        ),
+                  child: RefreshIndicator(
+                    onRefresh: applyFilters,
+                    child: gyms.isEmpty
+                        ? ListView(
+                            children: const [
+                              SizedBox(height: 120),
+                              EmptyState(
+                                icon: Icons.fitness_center,
+                                title: 'No gyms found',
+                                message: 'Try changing your search or filter options.',
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: gyms.length,
+                            itemBuilder: (context, index) {
+                              final gym = gyms[index];
+                              return _gymCard(gym);
+                            },
+                          ),
+                  ),
                 ),
               ],
             ),
@@ -305,7 +312,7 @@ class _GymsScreenState extends State<GymsScreen> {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),

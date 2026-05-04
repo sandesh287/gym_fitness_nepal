@@ -69,20 +69,29 @@ class _MembershipHistoryScreenState extends State<MembershipHistoryScreen> {
                 color: Color(0xFF1B5E20),
               ),
             )
-          : memberships.isEmpty
-              ? const EmptyState(
-                icon: Icons.card_membership,
-                title: 'No memberships yet',
-                message: 'Purchase a gym plan and your membership history will appear here.',
-              )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: memberships.length,
-                  itemBuilder: (context, index) {
-                    final membership = memberships[index];
-                    return _membershipCard(membership);
-                  },
-                ),
+          : RefreshIndicator(
+              onRefresh: fetchHistory,
+              child: memberships.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 120),
+                        EmptyState(
+                          icon: Icons.card_membership,
+                          title: 'No memberships yet',
+                          message:
+                              'Purchase a gym plan and your membership history will appear here.',
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: memberships.length,
+                      itemBuilder: (context, index) {
+                        final membership = memberships[index];
+                        return _membershipCard(membership);
+                      },
+                    ),
+            ),
     );
   }
 

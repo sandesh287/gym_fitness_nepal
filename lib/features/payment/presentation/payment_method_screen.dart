@@ -1,9 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import '../../membership/presentation/success_screen.dart';
 import '../../../core/network/api_service.dart';
 import 'package:khalti_checkout_flutter/khalti_checkout_flutter.dart';
 import '../../../core/storage/auth_storage.dart';
+import '../../home/presentation/home_screen.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
   final Map gym;
@@ -29,15 +29,69 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> payMock() async {
     if (selectedPayment == 'esewa') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('eSewa real integration coming later.'),
-        ),
-      );
+      await payWithEsewaMock();
       return;
     }
 
     await payWithKhalti();
+  }
+
+  Future<void> payWithEsewaMock() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final userPhone = await authStorage.getPhone() ?? '';
+
+      final result = await apiService.mockEsewaPayment(
+        amount: widget.plan['price'],
+        purchaseOrderId:
+            'plan_${widget.plan['id']}_${DateTime.now().millisecondsSinceEpoch}',
+        purchaseOrderName: widget.plan['title'],
+        customerPhone: userPhone,
+      );
+
+      if (result['success'] == true) {
+        await apiService.createMembership(
+          userPhone: userPhone,
+          gymId: widget.gym['id'],
+          gymName: widget.gym['name'],
+          planId: widget.plan['id'],
+          planTitle: widget.plan['title'],
+          planPrice: widget.plan['display_price'],
+          durationDays: widget.plan['duration_days'],
+          paymentMethod: 'esewa',
+          pidx: result['transaction_id'],
+        );
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('eSewa payment successful')),
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HomeScreen(),
+          ),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('eSewa payment failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> payWithKhalti() async {
@@ -49,7 +103,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       final userPhone = await authStorage.getPhone() ?? '';
 
       final response = await apiService.initiateKhaltiPayment(
-        amount: 250000,
+        amount: widget.plan['price'] * 100,
         purchaseOrderId: 'plan_${widget.plan['id']}_${DateTime.now().millisecondsSinceEpoch}',
         purchaseOrderName: widget.plan['title'],
         customerName: 'Test User',
@@ -85,7 +139,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 gymName: widget.gym['name'],
                 planId: widget.plan['id'],
                 planTitle: widget.plan['title'],
-                planPrice: widget.plan['price'],
+                planPrice: widget.plan['display_price'],
                 durationDays: widget.plan['duration_days'],
                 paymentMethod: 'khalti',
                 pidx: paymentResult.payload?.pidx ?? '',
@@ -97,11 +151,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 const SnackBar(content: Text('Payment verified successfully')),
               );
 
-              Navigator.pushReplacement(
+              Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const SuccessScreen(),
+                  builder: (_) => const HomeScreen(),
                 ),
+                (route) => false,
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -269,7 +324,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                widget.plan['price'],
+                widget.plan['display_price'],
                 style: const TextStyle(
                   color: Color(0xFF1B5E20),
                   fontSize: 20,

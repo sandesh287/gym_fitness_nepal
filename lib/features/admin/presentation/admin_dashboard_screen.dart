@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'admin_gyms_screen.dart';
+import 'admin_classes_screen.dart';
+import 'admin_membership_plan_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -42,21 +44,44 @@ class AdminDashboardScreen extends StatelessWidget {
               ),
             ),
 
-            const _AdminCard(
-              icon: Icons.self_improvement,
-              title: 'Classes',
-              subtitle: 'Manage classes',
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AdminClassesScreen(),
+                  ),
+                );
+              },
+              child: const _AdminCard(
+                icon: Icons.self_improvement,
+                title: 'Classes',
+                subtitle: 'Manage classes',
+              ),
             ),
+            
             const _AdminCard(
               icon: Icons.calendar_month,
               title: 'Bookings',
               subtitle: 'View bookings',
             ),
-            const _AdminCard(
-              icon: Icons.card_membership,
-              title: 'Memberships',
-              subtitle: 'View plans',
+            
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AdminMembershipPlansScreen(),
+                  ),
+                );
+              },
+              child: const _AdminCard(
+                icon: Icons.card_membership,
+                title: 'Memberships',
+                subtitle: 'Manage plans',
+              ),
             ),
+
             const _AdminCard(
               icon: Icons.people,
               title: 'Users',

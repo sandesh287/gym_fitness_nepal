@@ -8,6 +8,7 @@ import '../../booking/presentation/booking_history_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../gyms/presentation/gym_screen.dart';
+import '../../booking/presentation/featured_classes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List gyms = [];
   bool isLoadingGyms = true;
+
+  List featuredClasses = [];
+  bool isLoadingFeaturedClasses = true;
 
   Future<void> logout() async {
     final authStorage = AuthStorage();
@@ -43,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     fetchGyms();
     fetchMembership();
+    fetchFeaturedClasses();
   }
 
   Future<void> fetchGyms() async {
@@ -50,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final result = await apiService.getGyms();
 
       setState(() {
-        gyms = result;
+        gyms = result.take(4).toList();
         isLoadingGyms = false;
       });
     } catch (e) {
@@ -85,6 +90,51 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> fetchFeaturedClasses() async {
+    try {
+      final result = await apiService.getClasses();
+
+      final Map<String, List<Map>> grouped = {};
+
+      for (var c in result) {
+        final title = c['title'].toString();
+
+        if (!grouped.containsKey(title)) {
+          grouped[title] = [];
+        }
+
+        grouped[title]!.add(c);
+      }
+
+      final classes = grouped.entries.map((entry) {
+        final classList = entry.value;
+        final first = classList.first;
+
+        return {
+          ...first,
+          'gym_count': classList.length,
+        };
+      }).toList();
+
+      setState(() {
+        featuredClasses = classes.take(2).toList();
+        isLoadingFeaturedClasses = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingFeaturedClasses = false;
+      });
+    }
+  }
+
+  Future<void> refreshHome() async {
+    await Future.wait([
+      fetchGyms(),
+      fetchMembership(),
+      fetchFeaturedClasses(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,30 +149,34 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _activeMembershipCard(),
-            const SizedBox(height: 20),
+      body: RefreshIndicator(
+        onRefresh: refreshHome,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _activeMembershipCard(),
+              const SizedBox(height: 20),
 
-            _sectionTitle('Quick Actions'),
-            const SizedBox(height: 12),
-            _quickActions(),
+              _sectionTitle('Quick Actions'),
+              const SizedBox(height: 12),
+              _quickActions(),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            _sectionTitle('Nearby Gyms'),
-            const SizedBox(height: 12),
-            _nearbyGyms(),
+              _sectionTitle('Nearby Gyms'),
+              const SizedBox(height: 12),
+              _nearbyGyms(),
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            _sectionTitle('Featured Classes'),
-            const SizedBox(height: 12),
-            _featuredClasses(),
-          ],
+              _sectionTitle('Featured Classes'),
+              const SizedBox(height: 12),
+              _featuredClasses(),
+            ],
+          ),
         ),
       ),
 
@@ -265,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         _quickAction(Icons.history, 'History'),
         const SizedBox(width: 10),
-        _quickAction(Icons.fitness_center, 'Gyms'),
+        _quickAction(Icons.self_improvement, 'Classes'),
         const SizedBox(width: 10),
         _quickAction(Icons.calendar_month, 'Bookings'),
       ],
@@ -284,11 +338,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }
-          if (title == 'Gyms') {
+
+          if (title == 'Classes') {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const GymsScreen(),
+                builder: (_) => const FeaturedClassesScreen(),
               ),
             );
           }
@@ -422,29 +477,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _featuredClasses() {
-    final classes = [
-      {'title': 'Morning Yoga', 'time': '6:00 AM', 'trainer': 'Trainer Sita'},
-      {
-        'title': 'HIIT Training',
-        'time': '5:30 PM',
-        'trainer': 'Trainer Ramesh',
-      },
-    ];
+    if (isLoadingFeaturedClasses) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF1B5E20),
+        ),
+      );
+    }
+
+    if (featuredClasses.isEmpty) {
+      return const Text('No featured classes available');
+    }
 
     return Column(
-      children: classes.map((fitnessClass) {
+      children: featuredClasses.map((fitnessClass) {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.06),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
-              )
+              ),
             ],
           ),
           child: Row(
@@ -453,15 +511,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 58,
                 width: 58,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+                  color: const Color(0xFFE3F2FD),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
                   Icons.self_improvement,
@@ -475,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      fitnessClass['title']!,
+                      fitnessClass['title'],
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -485,6 +536,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '${fitnessClass['time']} • ${fitnessClass['trainer']}',
                       style: const TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      fitnessClass['gym_count'] == 1
+                          ? fitnessClass['gym_name'] ?? ''
+                          : 'Available at ${fitnessClass['gym_count']} gyms',
+                      style: TextStyle(
+                        color: fitnessClass['gym_count'] == 1
+                            ? const Color(0xFF1B5E20)
+                            : Colors.black54,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),

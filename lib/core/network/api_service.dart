@@ -13,6 +13,8 @@ class ApiService {
     ),
   );
 
+
+  // OTP request and response
   Future<Map<String, dynamic>> sendOtp(String phone) async {
     final response = await _dio.post('/auth/send-otp', data: {'phone': phone});
 
@@ -28,6 +30,8 @@ class ApiService {
     return response.data;
   }
 
+
+  // Search
   Future<List<dynamic>> getGyms({
     String? search,
     String? location,
@@ -49,12 +53,77 @@ class ApiService {
     return response.data['data'];
   }
 
+
+  // Gym Membership Plans
   Future<List<dynamic>> getGymPlans(int gymId) async {
-    final response = await _dio.get('/gyms/$gymId/plans');
+    final response = await _dio.get('/membership-plans/gym/$gymId');
 
     return response.data['data'];
   }
 
+  Future<List<dynamic>> getAllMembershipPlans() async {
+    final response = await _dio.get('/membership-plans/');
+    return response.data['data'];
+  }
+
+  Future<Map<String, dynamic>> createMembershipPlan({
+    required int gymId,
+    required String gymName,
+    required String title,
+    required String duration,
+    required int durationDays,
+    required int price,
+    required String features,
+  }) async {
+    final response = await _dio.post(
+      '/membership-plans/',
+      data: {
+        'gym_id': gymId,
+        'gym_name': gymName,
+        'title': title,
+        'duration': duration,
+        'duration_days': durationDays,
+        'price': price,
+        'features': features,
+      },
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateMembershipPlan({
+    required int planId,
+    required int gymId,
+    required String gymName,
+    required String title,
+    required String duration,
+    required int durationDays,
+    required int price,
+    required String features,
+  }) async {
+    final response = await _dio.put(
+      '/membership-plans/$planId',
+      data: {
+        'gym_id': gymId,
+        'gym_name': gymName,
+        'title': title,
+        'duration': duration,
+        'duration_days': durationDays,
+        'price': price,
+        'features': features,
+      },
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> deleteMembershipPlan(int planId) async {
+    final response = await _dio.delete('/membership-plans/$planId');
+    return response.data;
+  }
+
+
+  // Payment Gateway
   Future<Map<String, dynamic>> initiateKhaltiPayment({
     required int amount,
     required String purchaseOrderId,
@@ -89,6 +158,8 @@ class ApiService {
     return response.data;
   }
 
+
+  // Gym Membership
   Future<Map<String, dynamic>> createMembership({
     required String userPhone,
     required int gymId,
@@ -140,6 +211,8 @@ class ApiService {
     return response.data['data'];
   }
 
+
+  // Gym Classes Booking
   Future<List<dynamic>> getClasses({int? gymId}) async {
     final response = await _dio.get(
       '/bookings/classes',
@@ -189,6 +262,8 @@ class ApiService {
     return response.data;
   }
 
+
+  // Profile
   Future<Map<String, dynamic>> getProfile(String phone) async {
     final response = await _dio.get(
       '/users/profile',
@@ -216,6 +291,7 @@ class ApiService {
   }
 
 
+  // Gyms
   Future<Map<String, dynamic>> createGym({
     required String name,
     required String location,
@@ -259,6 +335,87 @@ class ApiService {
 
   Future<Map<String, dynamic>> deleteGym(int gymId) async {
     final response = await _dio.delete('/gyms/$gymId');
+    return response.data;
+  }
+
+
+  // Gym classes inside Gym (from admin panel)
+  Future<Map<String, dynamic>> createClass({
+    required int gymId,
+    required String gymName,
+    required String title,
+    required String trainer,
+    required String time,
+    required String duration,
+    required int capacity,
+  }) async {
+    final response = await _dio.post(
+      '/bookings/classes',
+      data: {
+        'gym_id': gymId,
+        'gym_name': gymName,
+        'title': title,
+        'trainer': trainer,
+        'time': time,
+        'duration': duration,
+        'capacity': capacity,
+      },
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> updateClass({
+    required int classId,
+    required int gymId,
+    required String gymName,
+    required String title,
+    required String trainer,
+    required String time,
+    required String duration,
+    required int capacity,
+    required int availableSlots,
+  }) async {
+    final response = await _dio.put(
+      '/bookings/classes/$classId',
+      data: {
+        'gym_id': gymId,
+        'gym_name': gymName,
+        'title': title,
+        'trainer': trainer,
+        'time': time,
+        'duration': duration,
+        'capacity': capacity,
+        'available_slots': availableSlots,
+      },
+    );
+
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> deleteClass(int classId) async {
+    final response = await _dio.delete('/bookings/classes/$classId');
+    return response.data;
+  }
+
+
+  // esewa mock payment
+  Future<Map<String, dynamic>> mockEsewaPayment({
+    required int amount,
+    required String purchaseOrderId,
+    required String purchaseOrderName,
+    required String customerPhone,
+  }) async {
+    final response = await _dio.post(
+      '/payments/esewa/mock-pay',
+      data: {
+        'amount': amount,
+        'purchase_order_id': purchaseOrderId,
+        'purchase_order_name': purchaseOrderName,
+        'customer_phone': customerPhone,
+      },
+    );
+
     return response.data;
   }
 }
