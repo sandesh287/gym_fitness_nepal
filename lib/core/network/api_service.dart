@@ -3,7 +3,8 @@ import 'package:dio/dio.dart';
 class ApiService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://127.0.0.1:8000/api/v1',
+      // baseUrl: 'http://127.0.0.1:8000/api/v1',
+      baseUrl: 'https://gym-fitness-nepal-backend.onrender.com/api/v1',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
