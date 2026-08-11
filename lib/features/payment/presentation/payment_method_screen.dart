@@ -116,7 +116,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       final payConfig = KhaltiPayConfig(
         publicKey: khaltiPublicKey,
         pidx: pidx,
-        environment: Environment.test,
+        environment: Environment.test, 
+        paymentUrl: '',
       );
 
       await Khalti.init(
