@@ -44,14 +44,15 @@ git push origin main
 
 
 
-Set-Location "D:\Projects\gym_fitness_nepal\mobile_app"
+Set-Location "E:\practice_projects\gym_fitness_nepal\mobile_app"
 $env:GIT_AUTHOR_NAME = 'Sandesh'
 $env:GIT_AUTHOR_EMAIL = 'sangm3138@gmail.com'
 $env:GIT_COMMITTER_NAME = 'Sandesh'
 $env:GIT_COMMITTER_EMAIL = 'sangm3138@gmail.com'
 $dates = @(
-    '2026-08-22',
-    '2026-08-23'
+    '2026-09-10',
+    '2026-09-12',
+    '2026-09-14'
 )
 foreach ($d in $dates) {
     $dt = "$d`T12:00:00+0545"
