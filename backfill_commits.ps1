@@ -50,11 +50,9 @@ $env:GIT_AUTHOR_EMAIL = 'sangm3138@gmail.com'
 $env:GIT_COMMITTER_NAME = 'Sandesh'
 $env:GIT_COMMITTER_EMAIL = 'sangm3138@gmail.com'
 $dates = @(
-    '2026-09-18',
-    '2026-09-19',
-    '2026-09-20',
-    '2026-09-21',
-    '2026-09-22'
+    '2026-09-25',
+    '2026-09-26',
+    '2026-09-27'
 )
 foreach ($d in $dates) {
     $dt = "$d`T12:00:00+0545"
